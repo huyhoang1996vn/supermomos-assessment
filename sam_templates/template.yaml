@@ -78,18 +78,6 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-        - IndexName: CompanyJobTitleCityStateIndex
-          KeySchema:
-            - AttributeName: company
-              KeyType: HASH
-            - AttributeName: jobTitle
-              KeyType: RANGE
-            - AttributeName: city
-              KeyType: RANGE
-            - AttributeName: state
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
         - IndexName: NumberOfEventsHostedIndex
           KeySchema:
             - AttributeName: number_of_events_hosted
@@ -160,39 +148,19 @@ Resources:
       AttributeDefinitions:
         - AttributeName: id
           AttributeType: S
-        - AttributeName: userId
-          AttributeType: S
         - AttributeName: eventId
           AttributeType: S
         - AttributeName: relationshipType
-          AttributeType: S
-        - AttributeName: createdAt
           AttributeType: S
       KeySchema:
         - AttributeName: id
           KeyType: HASH  # Partition key
       GlobalSecondaryIndexes:
-        - IndexName: UserIdIndex
-          KeySchema:
-            - AttributeName: userId
-              KeyType: HASH
-            - AttributeName: createdAt
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
         - IndexName: EventIdIndex
           KeySchema:
             - AttributeName: eventId
               KeyType: HASH
             - AttributeName: relationshipType
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-        - IndexName: RelationshipTypeIndex
-          KeySchema:
-            - AttributeName: relationshipType
-              KeyType: HASH
-            - AttributeName: createdAt
               KeyType: RANGE
           Projection:
             ProjectionType: ALL

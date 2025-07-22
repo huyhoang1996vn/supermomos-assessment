@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# SAM Deployment Script
+# SuperMomo SAM Deployment Script
 
 set -e
 
 # Configuration
-STACK_NAME="dynamodb"
+STACK_NAME="supermomos-dynamodb"
 TEMPLATE_FILE="sam_templates/template.yaml"
 REGION="ap-southeast-1"
 ENVIRONMENT=${1:-dev}
 
-echo "🚀 Deploying DynamoDB tables to AWS..."
+echo "🚀 Deploying SuperMomo DynamoDB tables to AWS..."
 echo "Environment: $ENVIRONMENT"
 echo "Region: $REGION"
 echo "Stack Name: $STACK_NAME"
@@ -44,7 +44,8 @@ sam deploy \
     --parameter-overrides EnvironmentType=$ENVIRONMENT \
     --capabilities CAPABILITY_IAM \
     --region $REGION \
-    --no-fail-on-empty-changeset
+    --no-fail-on-empty-changeset \
+    --confirm-changeset
 
 echo "✅ Deployment completed successfully!"
 echo ""

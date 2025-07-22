@@ -67,13 +67,13 @@ DEFAULT_FROM_NAME=SuperMomo
 
 ```bash
 # Deploy to dev environment (default)
-./deploy.sh
+./deploy-db.sh
 
 # Deploy to specific environment
-./deploy.sh prod
+./deploy-db.sh prod
 
 # Deploy to staging
-./deploy.sh staging
+./deploy-db.sh staging
 ```
 
 #### Option 2: Manual Deployment
