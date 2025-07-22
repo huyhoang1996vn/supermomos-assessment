@@ -333,11 +333,6 @@ curl -X POST "http://localhost:8000/users/send-email/" \
 curl -X GET "http://localhost:8000/email-status/{user_id}"
 ```
 
-#### Get Email Status by Email Address
-```bash
-curl -X GET "http://localhost:8000/email-status/email/john.doe@example.com"
-```
-
 #### Get All Email Status Records
 ```bash
 curl -X GET "http://localhost:8000/email-status/"
