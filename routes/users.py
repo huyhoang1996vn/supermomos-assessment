@@ -100,7 +100,7 @@ async def patch_user(user_id: str, event_id: str, relationship_type: Literal["ho
 
 
 @usersrouter.get("/list/", response_model=PaginatedUserResponse)
-async def filter_users2(
+async def filter_users(
     company: Optional[str] = Query(None, description="Filter by company name"),
     job_title: Optional[str] = Query(None, description="Filter by job title", alias="jobTitle"),
     city: Optional[str] = Query(None, description="Filter by city"),
@@ -228,7 +228,8 @@ async def send_email_to_users(
         
         return EmailResponse(
             message=f"Email campaign started in background. {len(recipients)} recipients will be notified.",
-            recipients=recipients
+            recipients=recipients,
+            recipients_count=len(recipients)
         )
         
     except Exception as e:

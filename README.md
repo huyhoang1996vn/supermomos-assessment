@@ -292,6 +292,40 @@ curl -X POST "http://localhost:8000/users/send-email/" \
   -d "min_hosted=1"
 ```
 
+**Endpoint**: `POST /users/send-email/`
+
+**Request Body** (JSON):
+```json
+{
+  "subject": "Email Subject",
+  "body": "<h1>HTML Content</h1><p>Email body content</p>"
+}
+```
+
+**Query Parameters**:
+- `company` (optional): Filter by company name
+- `jobTitle` (optional): Filter by job title
+- `city` (optional): Filter by city
+- `state` (optional): Filter by state
+- `min_hosted` (optional): Minimum number of events hosted
+- `max_hosted` (optional): Maximum number of events hosted
+- `min_attended` (optional): Minimum number of events attended
+- `max_attended` (optional): Maximum number of events attended
+
+**Response Format**:
+```json
+{
+  "message": "Email campaign completed. 25 emails sent successfully.",
+  "recipients": [
+    {
+      "userId": "userId",
+      "email": "john.doe@example.com",
+    }
+  ],
+  "recipients_count": 25
+}
+```
+
 ### Email Status
 
 #### Get Email Status by User ID
@@ -330,107 +364,6 @@ curl -X GET "http://localhost:8000/email-status/"
 - **Primary Key**: `userId` (String)
 - **GSI**: EmailIndex
 - **Attributes**: email, status, createdAt
-
-## 🔍 Advanced Filtering Examples
-
-### Filter Users by Multiple Criteria
-```bash
-# Users from Tech Corp in San Francisco who have hosted at least 1 event
-curl -X GET "http://localhost:8000/users/list/?company=Tech%20Corp&city=San%20Francisco&min_hosted=1"
-
-# Software Engineers from California
-curl -X GET "http://localhost:8000/users/list/?jobTitle=Software%20Engineer&state=CA"
-
-# Users who have attended 5+ events
-curl -X GET "http://localhost:8000/users/list/?min_attended=5"
-```
-
-### Advanced Filtering Use Cases
-
-#### 1. **Event Hosts by Location**
-```bash
-# Find all event hosts in California
-curl -X GET "http://localhost:8000/users/list/?state=CA&min_hosted=1&sort_by=number_of_events_hosted&sort_order=desc"
-
-# Top hosts in San Francisco
-curl -X GET "http://localhost:8000/users/list/?city=San%20Francisco&min_hosted=2&sort_by=number_of_events_hosted&sort_order=desc&pagesize=10"
-```
-
-#### 2. **Active Community Members**
-```bash
-# Users who are both hosts and attendees
-curl -X GET "http://localhost:8000/users/list/?min_hosted=1&min_attended=3"
-
-# Most active users (high attendance)
-curl -X GET "http://localhost:8000/users/list/?min_attended=5&sort_by=number_of_events_attended&sort_order=desc"
-```
-
-#### 3. **Professional Networking**
-```bash
-# Engineers from specific companies
-curl -X GET "http://localhost:8000/users/list/?jobTitle=Engineer&company=Google"
-
-# Senior professionals by location
-curl -X GET "http://localhost:8000/users/list/?jobTitle=Senior&city=San%20Francisco&state=CA"
-```
-
-#### 4. **Geographic Targeting**
-```bash
-# All users in a specific state
-curl -X GET "http://localhost:8000/users/list/?state=CA&sort_by=city"
-
-# Users in major tech cities
-curl -X GET "http://localhost:8000/users/list/?city=San%20Francisco&city=Seattle&city=Austin"
-```
-
-#### 5. **Company-Specific Filtering**
-```bash
-# All employees from a specific company
-curl -X GET "http://localhost:8000/users/list/?company=Microsoft"
-
-# Engineers from tech companies
-curl -X GET "http://localhost:8000/users/list/?company=Google&company=Facebook&company=Apple&jobTitle=Engineer"
-```
-
-### Filtering Performance Tips
-
-1. **Use Indexed Fields**: The API uses DynamoDB indexes for efficient filtering on:
-   - `company` (CompanyIndex)
-   - `jobTitle` (JobTitleIndex)
-   - `city` (CityIndex)
-   - `state` (StateIndex)
-   - `number_of_events_hosted` (NumberOfEventsHostedIndex)
-   - `number_of_events_attended` (NumberOfEventsAttendedIndex)
-
-2. **Combine Filters Efficiently**: Use indexed fields as primary filters for better performance
-
-3. **Pagination**: Always use pagination for large result sets to avoid timeouts
-
-4. **Sorting**: Use `sort_by` and `sort_order` to get the most relevant results first
-
-### Send Targeted Email Campaigns
-```bash
-# Email to all engineers in California
-curl -X POST "http://localhost:8000/users/send-email/" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "subject": "Engineering Meetup",
-    "body": "<h1>Engineering Meetup</h1><p>Join us for a technical discussion.</p>"
-  }' \
-  -G \
-  -d "jobTitle=Engineer" \
-  -d "state=CA"
-
-# Email to event hosts
-curl -X POST "http://localhost:8000/users/send-email/" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "subject": "Host Appreciation",
-    "body": "<h1>Thank You!</h1><p>We appreciate your contribution as a host.</p>"
-  }' \
-  -G \
-  -d "min_hosted=1"
-```
 
 ## 🚀 Deployment
 

@@ -101,6 +101,7 @@ class EmailRequest(BaseModel):
 class EmailResponse(BaseModel):
     message: str
     recipients: List[dict]
+    recipients_count: int
 
 # Email Status Models
 class EmailStatusBase(BaseModel):
