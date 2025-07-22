@@ -1,0 +1,267 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SuperMomo DynamoDB Tables using SAM
+
+Parameters:
+  EnvironmentType:
+    Type: String
+    Default: dev
+    Description: Environment type (dev, staging, prod)
+  ProjectName:
+    Type: String
+    Default: supermomos
+    Description: Project name for resource naming
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: python3.9
+    Environment:
+      Variables:
+        ENVIRONMENT: !Ref EnvironmentType
+        PROJECT_NAME: !Ref ProjectName
+
+Resources:
+  # Users Table
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "Users-${EnvironmentType}"
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: email
+          AttributeType: S
+        - AttributeName: company
+          AttributeType: S
+        - AttributeName: jobTitle
+          AttributeType: S
+        - AttributeName: city
+          AttributeType: S
+        - AttributeName: state
+          AttributeType: S
+        - AttributeName: number_of_events_hosted
+          AttributeType: N
+        - AttributeName: number_of_events_attended
+          AttributeType: N
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH  # Partition key
+      GlobalSecondaryIndexes:
+        - IndexName: EmailIndex
+          KeySchema:
+            - AttributeName: email
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: CompanyIndex
+          KeySchema:
+            - AttributeName: company
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: JobTitleIndex
+          KeySchema:
+            - AttributeName: jobTitle
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: CityIndex
+          KeySchema:
+            - AttributeName: city
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: StateIndex
+          KeySchema:
+            - AttributeName: state
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: CompanyJobTitleCityStateIndex
+          KeySchema:
+            - AttributeName: company
+              KeyType: HASH
+            - AttributeName: jobTitle
+              KeyType: RANGE
+            - AttributeName: city
+              KeyType: RANGE
+            - AttributeName: state
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: NumberOfEventsHostedIndex
+          KeySchema:
+            - AttributeName: number_of_events_hosted
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: NumberOfEventsAttendedIndex
+          KeySchema:
+            - AttributeName: number_of_events_attended
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentType
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # Events Table
+  EventsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "Events-${EnvironmentType}"
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: slug
+          AttributeType: S
+        - AttributeName: owner
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH  # Partition key
+      GlobalSecondaryIndexes:
+        - IndexName: SlugIndex
+          KeySchema:
+            - AttributeName: slug
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: OwnerIndex
+          KeySchema:
+            - AttributeName: owner
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentType
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # UserEventRelationship Table
+  UserEventRelationshipTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "UserEventRelationship-${EnvironmentType}"
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: eventId
+          AttributeType: S
+        - AttributeName: relationshipType
+          AttributeType: S
+        - AttributeName: createdAt
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH  # Partition key
+      GlobalSecondaryIndexes:
+        - IndexName: UserIdIndex
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+            - AttributeName: createdAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: EventIdIndex
+          KeySchema:
+            - AttributeName: eventId
+              KeyType: HASH
+            - AttributeName: relationshipType
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: RelationshipTypeIndex
+          KeySchema:
+            - AttributeName: relationshipType
+              KeyType: HASH
+            - AttributeName: createdAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentType
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # EmailQueue Table
+  EmailQueueTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "EmailStatus-${EnvironmentType}"
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: EmailIndex
+          KeySchema:
+            - AttributeName: email
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentType
+        - Key: Project
+          Value: !Ref ProjectName
+
+Outputs:
+  UsersTableArn:
+    Description: ARN of the Users table
+    Value: !GetAtt UsersTable.Arn
+    Export:
+      Name: !Sub "UsersTableArn-${EnvironmentType}"
+  UsersTableName:
+    Description: Name of the Users table
+    Value: !Ref UsersTable
+    Export:
+      Name: !Sub "UsersTableName-${EnvironmentType}"
+  EventsTableArn:
+    Description: ARN of the Events table
+    Value: !GetAtt EventsTable.Arn
+    Export:
+      Name: !Sub "EventsTableArn-${EnvironmentType}"
+  EventsTableName:
+    Description: Name of the Events table
+    Value: !Ref EventsTable
+    Export:
+      Name: !Sub "EventsTableName-${EnvironmentType}"
+  UserEventRelationshipTableArn:
+    Description: ARN of the UserEventRelationship table
+    Value: !GetAtt UserEventRelationshipTable.Arn
+    Export:
+      Name: !Sub "UserEventRelationshipTableArn-${EnvironmentType}"
+  UserEventRelationshipTableName:
+    Description: Name of the UserEventRelationship table
+    Value: !Ref UserEventRelationshipTable
+    Export:
+      Name: !Sub "UserEventRelationshipTableName-${EnvironmentType}" 
